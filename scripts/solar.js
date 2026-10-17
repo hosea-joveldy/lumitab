@@ -449,7 +449,6 @@ addEventListener(
 );
 document.documentElement.addEventListener("pointerleave", () => {
   pointerInside = false;
-  target.set(0, 0);
 });
 for (const type of ["pointerdown", "keydown", "wheel"]) {
   addEventListener(
