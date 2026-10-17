@@ -1,4 +1,4 @@
-# Custom New Tab
+# Lumi New Tab
 
 A lightweight Firefox new-tab extension with a live clock, Google and NixOS package search boxes, and an animated 3D solar system. It also displays GitHub contribution and nixpkgs pull request stats.
 
