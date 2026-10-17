@@ -1,4 +1,4 @@
-import * as THREE from "./lib/three.module.min.js";
+import * as THREE from "../lib/three.module.min.js";
 
 const FPS_ACTIVE = 60;
 const FPS_IDLE = 15; // used after a minute with no input
