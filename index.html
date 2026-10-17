@@ -1,63 +1,55 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>New Tab</title>
-    <style>
-      :root {
-        --bg: #2d353b;
-        --bg1: #343f44;
-        --fg: #d3c6aa;
-        --green: #a7c080;
-      }
-      body {
-        margin: 0;
-        height: 100vh;
-        background: var(--bg);
-        color: var(--fg);
-        font-family: "JetBrains Nerd Font Mono", monospace;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2rem;
-      }
-      #clock {
-        font-size: 4rem;
-        color: var(--green);
-      }
-      nav {
-        display: flex;
-        gap: 1rem;
-      }
-      nav a {
-        background: var(--bg1);
-        color: var(--fg);
-        text-decoration: none;
-        padding: 0.6rem 1.2rem;
-        border-radius: 10px;
-      }
-      nav a:hover {
-        outline: 1px solid var(--green);
-      }
-    </style>
-  </head>
-  <body>
-    <div id="clock"></div>
-    <nav>
-      <a href="https://github.com">github</a>
-      <a href="https://search.nixos.org">nixpkgs</a>
-      <a href="https://reddit.com/r/unixporn">unixporn</a>
-    </nav>
-    <script>
-      const tick = () =>
-        (document.getElementById("clock").textContent =
-          new Date().toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          }));
-      tick();
-      setInterval(tick, 1000);
-    </script>
-  </body>
-</html>
+<meta charset="utf-8" />
+<title>New Tab</title>
+<link rel="stylesheet" href="style.css" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<canvas id="scene"></canvas>
+
+<header id="time">
+  <div id="clock"></div>
+  <div id="date"></div>
+</header>
+
+<main id="search">
+  <h1 id="greeting"></h1>
+  <form action="https://www.google.com/search" method="get">
+    <input
+      type="text"
+      name="q"
+      placeholder="search google"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="search google"
+    />
+  </form>
+  <form action="https://search.nixos.org/packages" method="get">
+    <input type="hidden" name="channel" value="unstable" />
+    <input
+      type="text"
+      name="query"
+      placeholder="search nixpkgs"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="search nixpkgs"
+    />
+  </form>
+</main>
+
+<aside id="gh">
+  <div class="gh-title">github / luminus</div>
+  <div class="gh-row">
+    <span id="gh-contribs">–</span><small>contributions (1y)</small>
+  </div>
+  <div class="gh-title gh-sub">nixpkgs</div>
+  <div class="gh-row">
+    <span id="gh-merged">–</span><small>merged PRs</small>
+  </div>
+  <div class="gh-row"><span id="gh-open">–</span><small>open</small></div>
+  <div class="gh-latest" id="gh-latest"></div>
+</aside>
+
+<div id="label"></div>
+
+<script src="scripts/clock.js"></script>
+<script src="scripts/github.js"></script>
+<script type="module" src="scripts/solar.js"></script>

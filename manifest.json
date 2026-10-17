@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Custom New Tab",
+  "name": "Lumi New Tab",
   "version": "1.1",
   "browser_specific_settings": {
     "gecko": {
@@ -9,5 +9,7 @@
   },
   "chrome_url_overrides": {
     "newtab": "index.html"
-  }
+  },
+  "permissions": ["https://github.com/*"],
+  "icons": { "48": "icon.svg", "96": "icon.svg" }
 }
