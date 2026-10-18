@@ -6,7 +6,7 @@ A lightweight Firefox new-tab extension with a live clock, Google and NixOS pack
 
 ## Features
 
-- Time, date, and greeting for `Asia/Jakarta`
+- Time, date, and greeting
 - Google and NixOS package search
 - Animated solar system with planet labels, stars, and pointer parallax
 - GitHub contribution count and merged/open nixpkgs PR stats
