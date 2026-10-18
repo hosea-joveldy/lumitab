@@ -1,9 +1,74 @@
 <!doctype html>
 <meta charset="utf-8" />
 <title>New Tab</title>
-<link rel="stylesheet" href="styles/style.css" />
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="styles/style.css" />
 <canvas id="scene"></canvas>
+
+<button
+  id="settings-btn"
+  type="button"
+  aria-label="settings"
+  aria-expanded="false"
+>
+  <svg
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="3" />
+    <path
+      d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"
+    />
+  </svg>
+</button>
+
+<form id="settings" hidden>
+  <label
+    >your name
+    <input
+      id="set-name"
+      type="text"
+      placeholder="optional"
+      autocomplete="off"
+      spellcheck="false"
+      maxlength="40"
+    />
+  </label>
+  <label
+    >timezone
+    <input
+      id="set-tz"
+      type="text"
+      list="tzlist"
+      placeholder="Asia/Jakarta"
+      autocomplete="off"
+      spellcheck="false"
+    />
+  </label>
+  <datalist id="tzlist"></datalist>
+  <label
+    >github username
+    <input
+      id="set-gh"
+      type="text"
+      placeholder="optional"
+      autocomplete="off"
+      spellcheck="false"
+      maxlength="39"
+    />
+  </label>
+  <div class="set-row">
+    <button type="submit">save</button>
+    <button type="button" id="set-reset">reset</button>
+  </div>
+</form>
 
 <header id="time">
   <div id="clock"></div>
@@ -27,29 +92,32 @@
     <input
       type="text"
       name="query"
-      placeholder="search nixpkgs"
+      placeholder="search nixos packages"
       autocomplete="off"
       spellcheck="false"
-      aria-label="search nixpkgs"
+      aria-label="search nixos packages"
     />
   </form>
 </main>
 
-<aside id="gh">
-  <div class="gh-title">github / luminus</div>
+<aside id="gh" hidden>
+  <div class="gh-title" id="gh-title"></div>
   <div class="gh-row">
-    <span id="gh-contribs">–</span><small>contributions (1y)</small>
+    <span id="gh-commits">–</span><small>contributions (1y)</small>
   </div>
-  <div class="gh-title gh-sub">nixpkgs</div>
-  <div class="gh-row">
-    <span id="gh-merged">–</span><small>merged PRs</small>
+  <div id="gh-nix" hidden>
+    <div class="gh-title gh-sub">nixpkgs</div>
+    <div class="gh-row">
+      <span id="gh-merged">–</span><small>merged PRs</small>
+    </div>
+    <div class="gh-row"><span id="gh-open">–</span><small>open</small></div>
+    <div class="gh-latest" id="gh-latest"></div>
   </div>
-  <div class="gh-row"><span id="gh-open">–</span><small>open</small></div>
-  <div class="gh-latest" id="gh-latest"></div>
 </aside>
 
 <div id="label"></div>
 
+<script src="scripts/settings.js"></script>
 <script src="scripts/clock.js"></script>
 <script src="scripts/github.js"></script>
 <script type="module" src="scripts/solar.js"></script>

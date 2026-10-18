@@ -1,21 +1,20 @@
-const TZ = "Asia/Jakarta";
 const clock = document.getElementById("clock");
 const date = document.getElementById("date");
 const greeting = document.getElementById("greeting");
 
 const timeFmt = new Intl.DateTimeFormat("en-GB", {
-  timeZone: TZ,
+  timeZone: settings.tz,
   hour: "2-digit",
   minute: "2-digit",
 });
 const dateFmt = new Intl.DateTimeFormat("en-GB", {
-  timeZone: TZ,
+  timeZone: settings.tz,
   weekday: "long",
   day: "numeric",
   month: "long",
 });
 const hourFmt = new Intl.DateTimeFormat("en-GB", {
-  timeZone: TZ,
+  timeZone: settings.tz,
   hour: "numeric",
   hourCycle: "h23",
 });
@@ -31,7 +30,7 @@ function tick() {
   const p = Object.fromEntries(
     dateFmt.formatToParts(now).map((x) => [x.type, x.value]),
   );
-  put(date, `${p.weekday}, ${p.day} ${p.month}`.toLowerCase()); // monday, 12 august
+  put(date, `${p.weekday}, ${p.day} ${p.month}`); // Monday, 12 August
 
   const h = Number(hourFmt.format(now));
   const part =
@@ -42,7 +41,13 @@ function tick() {
         : h >= 17 && h < 21
           ? "evening"
           : "night";
-  put(greeting, `good ${part}, lumi`);
+  put(
+    greeting,
+    (settings.name
+      ? `good ${part}, ${settings.name}`
+      : `good ${part}`
+    ).toLowerCase(),
+  );
 }
 tick();
 setInterval(tick, 1000);

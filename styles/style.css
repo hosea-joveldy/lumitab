@@ -1,3 +1,7 @@
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -29,7 +33,6 @@ body {
 }
 #date {
   margin-top: 10px;
-  margin-left: 8px;
   font-size: clamp(0.9rem, 1.4vw, 1.25rem);
   opacity: 0.7;
 }
@@ -126,4 +129,101 @@ body {
   border-radius: 6px;
   transition: opacity 0.12s;
   will-change: transform;
+}
+
+/* settings */
+#settings-btn {
+  position: fixed;
+  top: 28px;
+  right: 32px;
+  z-index: 5;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  color: #f9f9f9;
+  opacity: 0.55;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+}
+#settings-btn:hover,
+#settings-btn[aria-expanded="true"] {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#settings {
+  position: fixed;
+  top: 76px;
+  right: 32px;
+  z-index: 5;
+  width: 280px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  margin: 0;
+  background: rgba(12, 12, 12, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+}
+#settings label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+#settings input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 0.85rem;
+  letter-spacing: 0;
+  color: #f9f9f9;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  outline: none;
+}
+#settings input:focus {
+  border-color: rgba(249, 249, 249, 0.6);
+}
+#settings input::placeholder {
+  color: rgba(249, 249, 249, 0.35);
+}
+.set-row {
+  display: flex;
+  gap: 8px;
+}
+.set-row button {
+  flex: 1;
+  padding: 9px 0;
+  font: inherit;
+  font-size: 0.8rem;
+  color: #f9f9f9;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+}
+.set-row button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+.set-row button[type="submit"] {
+  background: #f9f9f9;
+  color: #050505;
+  border-color: #f9f9f9;
+}
+.set-row button[type="submit"]:hover {
+  background: #fff;
 }

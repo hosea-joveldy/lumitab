@@ -1,6 +1,9 @@
-const USER = "hosea-joveldy";
-const KEY = "gh-stats-v3";
+const USER = settings.gh;
+const KEY = `gh-stats-v3-${USER.toLowerCase()}`;
 const TTL = 60 * 60 * 1000; // refetch at most once per hour
+
+const box = document.getElementById("gh");
+const nix = document.getElementById("gh-nix");
 
 const search = async (path, q, extra = "") => {
   const r = await fetch(
@@ -9,11 +12,11 @@ const search = async (path, q, extra = "") => {
   return r.json();
 };
 
-// same number as "N contributions in the last year" on your profile
+// same number as "N contributions in the last year" on the profile
 async function contributions() {
   try {
     const html = await fetch(
-      `https://github.com/users/${USER}/contributions`,
+      `https://github.com/users/${encodeURIComponent(USER)}/contributions`,
     ).then((r) => r.text());
     const m = html.match(/([\d,]+)\s+contributions?\s+in\s+the\s+last\s+year/i);
     return m ? Number(m[1].replace(/,/g, "")) : null;
@@ -26,7 +29,8 @@ const set = (id, v) => {
   document.getElementById(id).textContent = v;
 };
 function show(s) {
-  set("gh-contribs", s.contribs.toLocaleString("en-US"));
+  set("gh-commits", s.contribs.toLocaleString("en-US"));
+  nix.hidden = s.merged + s.open === 0; // only show nixpkgs if the user has PRs there
   set("gh-merged", s.merged);
   set("gh-open", s.open);
   set("gh-latest", s.latest ? `latest: ${s.latest}` : "");
@@ -54,7 +58,7 @@ async function load() {
     if ([m, o].some((x) => typeof x.total_count !== "number")) return; // rate-limited or error
     const stats = {
       at: Date.now(),
-      contribs: year ?? c.total_count ?? 0, // fall back to the commit search
+      contribs: year ?? c.total_count ?? 0,
       merged: m.total_count,
       open: o.total_count,
       latest: m.items?.[0]?.title ?? "",
@@ -65,4 +69,9 @@ async function load() {
     show(stats);
   } catch {}
 }
-load();
+
+if (USER) {
+  box.hidden = false;
+  document.getElementById("gh-title").textContent = `github / ${USER}`;
+  load();
+}
