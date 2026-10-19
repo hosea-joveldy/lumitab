@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "lumitab",
-  "version": "1.4",
+  "version": "1.5",
   "browser_specific_settings": {
     "gecko": {
       "id": "newtab@lumi"
@@ -10,7 +10,9 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "permissions": ["https://github.com/*"],
+  "permissions": [
+    "https://github.com/*"
+  ],
   "icons": {
     "48": "icon.svg",
     "96": "icon.svg"

@@ -1,16 +1,10 @@
 # lumitab
 
-A lightweight Firefox new-tab extension with a live clock, Google and NixOS package search boxes, and an animated 3D solar system. It also displays GitHub contribution and nixpkgs pull request stats.
+Lumitab is a Firefox new-tab extension that are suitable for nix/nixos users, especially those who contribute to nixpkgs.
 
-![New Tab Screenshot](./assets/screenshot.png)
+## Themes
 
-## Features
+- **Solar** — complete. An animated 3D solar system, clock, Google and NixOS package search, settings, and optional GitHub and nixpkgs stats.
+- **Glass** — planned; implementation has not started.
 
-- Time, date, and greeting
-- Google and NixOS package search
-- Animated solar system with planet labels, stars, and pointer parallax
-- GitHub contribution count and merged/open nixpkgs PR stats
-
-## License
-
-This repo is licensed under the [MIT License](LICENSE).
+The theme implementations live in `solar/` and `glass/`.
