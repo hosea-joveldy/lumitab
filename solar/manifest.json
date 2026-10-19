@@ -14,7 +14,7 @@
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "permissions": ["https://github.com/*"],
+  "permissions": ["https://github.com/*", "https://api.github.com/*"],
   "icons": {
     "48": "icon.svg",
     "96": "icon.svg"
