@@ -1,18 +1,20 @@
 {
   "manifest_version": 2,
-  "name": "lumitab",
-  "version": "1.5",
+  "name": "lumitab solar",
+  "version": "1.6",
+  "description": "A solar system themed startpage extension, targetted for nix/nixos user especially those who contribute to nixpkgs.",
   "browser_specific_settings": {
     "gecko": {
-      "id": "newtab@lumi"
+      "id": "lumitab@solar",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
     }
   },
   "chrome_url_overrides": {
     "newtab": "index.html"
   },
-  "permissions": [
-    "https://github.com/*"
-  ],
+  "permissions": ["https://github.com/*"],
   "icons": {
     "48": "icon.svg",
     "96": "icon.svg"
