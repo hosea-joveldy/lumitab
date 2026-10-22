@@ -5,7 +5,7 @@ Lumitab is a Firefox new-tab extension that is suitable for nix/nixos users, esp
 ## Themes
 
 <details>
-<summary><strong>Solar</strong> — complete. An animated 3D solar system, clock, Google and NixOS package search, settings, and optional GitHub and nixpkgs stats.</summary>
+<summary><strong>Solar</strong>. An animated 3D solar system, clock, Google and NixOS package search, settings, and optional GitHub and nixpkgs stats.</summary>
 
 <br>
 
@@ -14,7 +14,7 @@ Lumitab is a Firefox new-tab extension that is suitable for nix/nixos users, esp
 </details>
 
 <details>
-<summary><strong>Glass</strong> — complete. A frosted-glass startpage with clock, multi-engine search, settings, quick dock, and optional GitHub and nixpkgs stats.</summary>
+<summary><strong>Glass</strong>. A frosted-glass startpage with clock, multi-engine search, settings, quick dock, and optional GitHub and nixpkgs stats.</summary>
 
 <br>
 
