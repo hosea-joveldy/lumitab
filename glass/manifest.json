@@ -1,0 +1,27 @@
+{
+  "manifest_version": 2,
+  "name": "lumitab glass",
+  "version": "1.2",
+  "description": "A glass themed startpage extension, targetted for nix/nixos user especially those who contribute to nixpkgs.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "lumitab@glass",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  },
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "permissions": [
+    "https://github.com/*",
+    "https://api.github.com/*"
+  ],
+  "icons": {
+    "48": "icon.svg",
+    "96": "icon.svg"
+  }
+}

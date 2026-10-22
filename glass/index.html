@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>New Tab</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  </head>
+  <body data-theme="catppuccin" data-wp="glow">
+    <div class="bg" id="bg"></div>
+
+    <button
+      class="card gear"
+      id="settings-btn"
+      aria-label="Settings"
+      aria-haspopup="dialog"
+      title="Settings"
+    >
+      ⚙&#xFE0E;
+    </button>
+
+    <main class="wrap">
+      <!-- left: clock + search -->
+      <div class="col">
+        <section class="card hero">
+          <div id="time">--:--</div>
+          <div id="date"></div>
+        </section>
+
+        <form class="card search" id="sf" autocomplete="off">
+          <div class="engines" id="engines">
+            <span class="pill" id="pill"></span>
+            <button type="button" data-e="google">Google</button>
+            <button type="button" data-e="ddg">DuckDuckGo</button>
+            <button type="button" data-e="nix">NixPkgs</button>
+            <button type="button" data-e="github">GitHub</button>
+            <button type="button" data-e="wiki">Wikipedia</button>
+          </div>
+          <div class="field">
+            <input id="q" type="text" placeholder="Search the web…" autofocus />
+            <button type="submit">Search</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- right: stats -->
+      <div class="col">
+        <section class="card stat" id="gh">
+          <h2 id="gh-title">github</h2>
+          <div id="gh-body">
+            <div class="big" id="gh-commits">—</div>
+            <div class="cap" id="gh-cap">contributions in the last year</div>
+            <div class="heat" id="heat"></div>
+          </div>
+          <div class="cap" id="gh-empty" hidden>
+            Set your GitHub username in
+            <button type="button" id="gh-open-settings">settings</button> to see
+            your stats.
+          </div>
+        </section>
+
+        <section class="card stat" id="gh-nix" hidden>
+          <h2>nixpkgs pull requests</h2>
+          <div class="tabs" id="prtabs">
+            <button type="button" data-t="open">open</button
+            ><button type="button" data-t="merged">merged</button>
+          </div>
+          <div id="prlist"></div>
+          <a class="more" id="prmore" hidden></a>
+        </section>
+      </div>
+    </main>
+
+    <!-- settings modal -->
+    <dialog class="modal" id="settings" aria-labelledby="settings-title">
+      <form id="settings-form">
+        <h3 id="settings-title">Settings</h3>
+        <label
+          >GitHub username
+          <input
+            id="set-gh"
+            type="text"
+            placeholder="octocat"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </label>
+        <label
+          >GitHub token (optional)
+          <input
+            id="set-token"
+            type="password"
+            placeholder="github_pat_…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <small
+            >A read-only token (read:user) includes private contributions and
+            raises GitHub’s rate limit. Stored only in this browser and sent
+            only to api.github.com.</small
+          >
+        </label>
+        <label
+          >Timezone
+          <input
+            id="set-tz"
+            type="text"
+            list="tzlist"
+            placeholder="Asia/Jakarta"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <small>Leave empty to use your system timezone.</small>
+        </label>
+        <datalist id="tzlist"></datalist>
+        <label
+          >Theme
+          <select id="set-theme">
+            <option value="catppuccin">Catppuccin Mocha</option>
+            <option value="nord">Nord</option>
+            <option value="gruvbox">Gruvbox</option>
+            <option value="everforest">Everforest</option>
+          </select>
+        </label>
+        <label
+          >Background
+          <select id="set-bg">
+            <option value="glow">Theme glow</option>
+            <option value="custom">Custom image</option>
+          </select>
+        </label>
+        <label
+          >Upload an image
+          <input id="set-file" type="file" accept="image/*" />
+          <small id="file-note"
+            >Downscaled to 1920px and stored only in this browser. Dark images
+            with soft highlights work best.</small
+          >
+        </label>
+        <label
+          >Dim
+          <input id="set-dim" type="range" min="0" max="80" step="5" />
+        </label>
+        <div class="actions">
+          <button type="button" class="link" id="set-reset">Reset</button>
+          <span class="sp"></span>
+          <button type="button" id="set-cancel">Cancel</button>
+          <button type="submit" class="primary">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <nav class="card dock" id="dock">
+      <a href="https://claude.ai" title="Claude"
+        ><b><img src="icons/claude.png" alt="Claude" /></b><em>Claude</em></a
+      >
+      <a href="https://gemini.google.com" title="Gemini"
+        ><b><img src="icons/gemini.png" alt="Gemini" /></b><em>Gemini</em></a
+      >
+      <a href="https://github.com" title="GitHub"
+        ><b><img src="icons/github.png" alt="GitHub" /></b><em>GitHub</em></a
+      >
+      <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" title="OSTEP"
+        ><b><img src="icons/ostep.png" alt="OSTEP" /></b><em>OSTEP</em></a
+      >
+      <a
+        href="https://nixos-and-flakes.thiscute.world/"
+        title="NixOS &amp; Flakes"
+        ><b><img src="icons/nixos.png" alt="NixOS &amp; Flakes" /></b
+        ><em>NixOS &amp; Flakes</em></a
+      >
+      <a href="https://x.com" title="X"
+        ><b><img src="icons/x.png" alt="X" /></b><em>X</em></a
+      >
+      <a href="https://youtube.com" title="YouTube"
+        ><b><img src="icons/youtube.png" alt="YouTube" /></b><em>YouTube</em></a
+      >
+    </nav>
+
+    <script src="script.js"></script>
+  </body>
+</html>
