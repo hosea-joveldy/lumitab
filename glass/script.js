@@ -1,6 +1,5 @@
 const $ = (id) => document.getElementById(id);
 
-/* ================= settings ================= */
 const SETTINGS_KEY = "newtab-settings-v1";
 const THEMES = ["catppuccin", "nord", "gruvbox", "everforest"];
 
@@ -40,7 +39,6 @@ function loadSettings() {
 }
 let settings = loadSettings();
 
-/* ---- custom wallpaper: stored as a Blob in IndexedDB (localStorage is too small) ---- */
 const idb = (mode, fn) =>
   new Promise((res, rej) => {
     const o = indexedDB.open("newtab", 1);
@@ -59,14 +57,15 @@ const wpSet = (b) => idb("readwrite", (s) => s.put(b, "wallpaper"));
 const wpDel = () =>
   idb("readwrite", (s) => s.delete("wallpaper")).catch(() => {});
 
-async function downscale(file) {
+async function downscale(file, max = 1920, type = "image/jpeg") {
+  if (file.type === "image/svg+xml") return file;
   const bmp = await createImageBitmap(file);
-  const k = Math.min(1, 1920 / Math.max(bmp.width, bmp.height));
+  const k = Math.min(1, max / Math.max(bmp.width, bmp.height));
   const c = document.createElement("canvas");
   c.width = Math.round(bmp.width * k);
   c.height = Math.round(bmp.height * k);
   c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-  return new Promise((r) => c.toBlob(r, "image/jpeg", 0.85));
+  return new Promise((r) => c.toBlob(r, type, 0.85));
 }
 
 let wpUrl = "";
@@ -88,7 +87,135 @@ async function applyWallpaper() {
 }
 applyWallpaper();
 
-/* ================= clock ================= */
+const DOCK_KEY = "newtab-dock-v1";
+const MAX_DOCK = 12;
+const DEFAULT_DOCK = [
+  {
+    id: "claude",
+    name: "Claude",
+    url: "https://claude.ai",
+    icon: "icons/claude.png",
+  },
+  {
+    id: "gemini",
+    name: "Gemini",
+    url: "https://gemini.google.com",
+    icon: "icons/gemini.png",
+  },
+  {
+    id: "github",
+    name: "GitHub",
+    url: "https://github.com",
+    icon: "icons/github.png",
+  },
+  {
+    id: "ostep",
+    name: "OSTEP",
+    url: "https://pages.cs.wisc.edu/~remzi/OSTEP/",
+    icon: "icons/ostep.png",
+  },
+  {
+    id: "nixos",
+    name: "NixOS & Flakes",
+    url: "https://nixos-and-flakes.thiscute.world/",
+    icon: "icons/nixos.png",
+  },
+  { id: "x", name: "X", url: "https://x.com", icon: "icons/x.png" },
+  {
+    id: "youtube",
+    name: "YouTube",
+    url: "https://youtube.com",
+    icon: "icons/youtube.png",
+  },
+];
+const dockBlobGet = (id) =>
+  idb("readonly", (s) => s.get(`dock:${id}`)).catch(() => null);
+const dockBlobSet = (id, b) => idb("readwrite", (s) => s.put(b, `dock:${id}`));
+const dockBlobDel = (id) =>
+  idb("readwrite", (s) => s.delete(`dock:${id}`)).catch(() => {});
+
+function loadDock() {
+  try {
+    const d = JSON.parse(localStorage.getItem(DOCK_KEY));
+    if (
+      Array.isArray(d) &&
+      d.every((x) => x && typeof x.url === "string" && typeof x.id === "string")
+    )
+      return d.slice(0, MAX_DOCK);
+  } catch {}
+  return DEFAULT_DOCK.map((x) => ({ ...x }));
+}
+let dock = loadDock();
+let dockUrls = [];
+
+function fitDock() {
+  const n = dock.length || 1;
+  const small = innerWidth <= 560;
+  const gap = small ? 6 : 10;
+  const base = small ? 40 : 50;
+  const room = innerWidth - 20 - (small ? 16 : 24);
+  const icon = Math.max(
+    30,
+    Math.min(base, Math.floor((room - (n - 1) * gap) / n)),
+  );
+  document.documentElement.style.setProperty("--icon", `${icon}px`);
+}
+
+async function fillIcon(b, it) {
+  const letter = () => {
+    b.textContent = (it.name || "?").trim().charAt(0).toUpperCase();
+  };
+  if (!it.icon) return letter();
+  const img = document.createElement("img");
+  img.alt = "";
+  img.addEventListener("error", letter);
+  if (it.icon.startsWith("idb:")) {
+    const blob = await dockBlobGet(it.icon.slice(4));
+    if (!blob) return letter();
+    const u = URL.createObjectURL(blob);
+    dockUrls.push(u);
+    img.src = u;
+  } else {
+    img.src = it.icon;
+  }
+  b.textContent = "";
+  b.appendChild(img);
+}
+
+function renderDock() {
+  const nav = $("dock");
+  dockUrls.forEach((u) => URL.revokeObjectURL(u));
+  dockUrls = [];
+  nav.textContent = "";
+  nav.hidden = !dock.length;
+  for (const it of dock) {
+    const a = document.createElement("a");
+    a.href = it.url;
+    a.title = it.name;
+    const b = document.createElement("b");
+    const em = document.createElement("em");
+    em.textContent = it.name;
+    a.append(b, em);
+    nav.appendChild(a);
+    fillIcon(b, it);
+  }
+  fitDock();
+}
+renderDock();
+addEventListener("resize", fitDock);
+
+function normalizeUrl(v) {
+  v = v.trim();
+  if (!v) return null;
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = `https://${v}`;
+  try {
+    const u = new URL(v);
+    return /^https?:$/.test(u.protocol) ? u.href : null;
+  } catch {
+    return null;
+  }
+}
+
 function tick() {
   const d = new Date();
   const tz = settings.tz;
@@ -110,7 +237,6 @@ function tick() {
 tick();
 setInterval(tick, 10000);
 
-/* ================= search ================= */
 const ENGINES = {
   google: { url: "https://www.google.com/search?q=", hint: "Search Google…" },
   ddg: { url: "https://duckduckgo.com/?q=", hint: "Search DuckDuckGo…" },
@@ -151,7 +277,6 @@ function setEngine(e, animate = true) {
   movePill();
   const q = $("q");
   if (animate) {
-    // fade the old placeholder out, swap the text, fade the new one in
     q.classList.add("swap");
     setTimeout(() => {
       q.placeholder = ENGINES[e].hint;
@@ -165,11 +290,9 @@ function setEngine(e, animate = true) {
   } catch {}
 }
 setEngine(engine, false);
-// enable the slide transition only after the first position is set (no slide-in on load)
 requestAnimationFrame(() =>
   requestAnimationFrame(() => $("pill").classList.add("ready")),
 );
-// keep the pill aligned if fonts load late or the window resizes
 window.addEventListener("load", () => movePill());
 window.addEventListener("resize", () => movePill());
 
@@ -187,7 +310,6 @@ $("sf").addEventListener("submit", (ev) => {
   if (q) location.href = ENGINES[engine].url + encodeURIComponent(q);
 });
 
-/* ================= settings modal ================= */
 (() => {
   const dlg = $("settings");
   const f = {
@@ -200,6 +322,211 @@ $("sf").addEventListener("submit", (ev) => {
     file: $("set-file"),
   };
   let pending = null;
+
+  let draft = [];
+  const pend = new Map();
+  const pendUrls = new Map();
+  let prevUrls = [];
+  let upTarget = null;
+  const uid = () => Math.random().toString(36).slice(2, 9);
+  const mk = (tag, cls, txt) => {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (txt != null) e.textContent = txt;
+    return e;
+  };
+  const rowsBox = $("dock-rows");
+
+  async function iconSrc(it) {
+    if (!it.icon) return "";
+    if (!it.icon.startsWith("idb:")) return it.icon;
+    const id = it.icon.slice(4);
+    if (pendUrls.has(id)) return pendUrls.get(id);
+    const b = await dockBlobGet(id);
+    if (!b) return "";
+    const u = URL.createObjectURL(b);
+    prevUrls.push(u);
+    return u;
+  }
+
+  function renderRows() {
+    rowsBox.textContent = "";
+    for (const it of draft) {
+      const row = mk("div", "drow");
+      row.dataset.id = it.id;
+
+      const h = mk("span", "h", "⠿");
+      h.title = "Drag to reorder";
+      h.addEventListener("mousedown", () => (row.draggable = true));
+      row.addEventListener("dragstart", (e) => {
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", it.id);
+        row.classList.add("drag");
+      });
+      row.addEventListener("dragend", () => {
+        row.classList.remove("drag");
+        row.draggable = false;
+        const byId = new Map(draft.map((x) => [x.id, x]));
+        draft = [...rowsBox.children]
+          .map((r) => byId.get(r.dataset.id))
+          .filter(Boolean);
+      });
+
+      const ic = mk("button", "ic");
+      ic.type = "button";
+      ic.title = "Upload an icon";
+      ic.textContent =
+        (it.name || it.url || "+").trim().charAt(0).toUpperCase() || "+";
+      ic.addEventListener("click", () => {
+        upTarget = it.id;
+        $("dock-file").click();
+      });
+      iconSrc(it).then((src) => {
+        if (!src) return;
+        const img = new Image();
+        img.alt = "";
+        img.onload = () => {
+          ic.textContent = "";
+          ic.appendChild(img);
+        };
+        img.src = src;
+      });
+
+      const fields = mk("div", "f");
+      const n = mk("input");
+      n.placeholder = "Name";
+      n.value = it.name;
+      n.addEventListener("input", () => (it.name = n.value));
+      const u = mk("input");
+      u.placeholder = "https://example.com";
+      u.value = it.url;
+      u.spellcheck = false;
+      u.addEventListener("input", () => {
+        it.url = u.value;
+        u.setCustomValidity("");
+      });
+      fields.append(n, u);
+
+      const acts = mk("div", "a");
+      const move = (d) => {
+        const i = draft.indexOf(it);
+        const j2 = i + d;
+        if (j2 < 0 || j2 >= draft.length) return;
+        [draft[i], draft[j2]] = [draft[j2], draft[i]];
+        renderRows();
+      };
+      const up = mk("button", null, "▲");
+      const dn = mk("button", null, "▼");
+      const rm = mk("button", null, "✕");
+      for (const b of [up, dn, rm]) b.type = "button";
+      up.title = "Move up";
+      dn.title = "Move down";
+      rm.title = "Remove";
+      up.addEventListener("click", () => move(-1));
+      dn.addEventListener("click", () => move(1));
+      rm.addEventListener("click", () => {
+        draft = draft.filter((x) => x !== it);
+        pend.delete(it.id);
+        renderRows();
+      });
+      acts.append(up, dn, rm);
+
+      row.append(h, ic, fields, acts);
+      rowsBox.appendChild(row);
+    }
+    $("dock-add").hidden = draft.length >= MAX_DOCK;
+  }
+
+  rowsBox.addEventListener("dragover", (e) => {
+    const dragging = rowsBox.querySelector(".drag");
+    if (!dragging) return;
+    e.preventDefault();
+    const after = [...rowsBox.querySelectorAll(".drow:not(.drag)")].find(
+      (r) => {
+        const b = r.getBoundingClientRect();
+        return e.clientY < b.top + b.height / 2;
+      },
+    );
+    if (after) rowsBox.insertBefore(dragging, after);
+    else rowsBox.appendChild(dragging);
+  });
+
+  $("dock-add").addEventListener("click", () => {
+    if (draft.length >= MAX_DOCK) return;
+    draft.push({ id: uid(), name: "", url: "", icon: "" });
+    renderRows();
+    rowsBox.lastElementChild?.querySelector("input")?.focus();
+  });
+
+  $("dock-reset").addEventListener("click", () => {
+    draft = DEFAULT_DOCK.map((x) => ({ ...x }));
+    pend.clear();
+    pendUrls.forEach((u) => URL.revokeObjectURL(u));
+    pendUrls.clear();
+    renderRows();
+  });
+
+  $("dock-file").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    e.target.value = "";
+    const it = draft.find((x) => x.id === upTarget);
+    if (!file || !it) return;
+    try {
+      const blob = await downscale(file, 128, "image/png");
+      if (pendUrls.has(it.id)) URL.revokeObjectURL(pendUrls.get(it.id));
+      pend.set(it.id, blob);
+      pendUrls.set(it.id, URL.createObjectURL(blob));
+      it.icon = `idb:${it.id}`;
+      renderRows();
+    } catch {
+      $("dock-note").textContent = "Couldn’t read that image.";
+    }
+  });
+
+  function collectDock() {
+    const out = [];
+    for (const it of draft) {
+      if (!it.url.trim() && !it.name.trim()) continue;
+      const url = normalizeUrl(it.url);
+      if (!url) {
+        const inp = rowsBox.querySelector(
+          `.drow[data-id="${it.id}"] .f input:nth-child(2)`,
+        );
+        if (inp) {
+          inp.setCustomValidity("Enter a valid http(s) address");
+          inp.reportValidity();
+        }
+        return null;
+      }
+      const name =
+        it.name.trim() || new URL(url).hostname.replace(/^www\./, "");
+      out.push({ id: it.id, name, url, icon: it.icon || "" });
+    }
+    return out;
+  }
+
+  async function saveDock(nd) {
+    const keep = new Set(
+      nd.filter((x) => x.icon.startsWith("idb:")).map((x) => x.icon.slice(4)),
+    );
+    try {
+      for (const [id, b] of pend) if (keep.has(id)) await dockBlobSet(id, b);
+      for (const x of dock)
+        if (x.icon.startsWith("idb:") && !keep.has(x.icon.slice(4)))
+          await dockBlobDel(x.icon.slice(4));
+      localStorage.setItem(DOCK_KEY, JSON.stringify(nd));
+    } catch {}
+    dock = nd;
+    renderDock();
+  }
+
+  dlg.addEventListener("close", () => {
+    pendUrls.forEach((u) => URL.revokeObjectURL(u));
+    pendUrls.clear();
+    pend.clear();
+    prevUrls.forEach((u) => URL.revokeObjectURL(u));
+    prevUrls = [];
+  });
 
   try {
     const list = $("tzlist");
@@ -220,6 +547,8 @@ $("sf").addEventListener("submit", (ev) => {
     f.file.value = "";
     pending = null;
     f.tz.setCustomValidity("");
+    draft = dock.map((x) => ({ ...x }));
+    renderRows();
     dlg.showModal();
     f.gh.focus();
   };
@@ -231,7 +560,6 @@ $("sf").addEventListener("submit", (ev) => {
   });
   f.tz.addEventListener("input", () => f.tz.setCustomValidity(""));
 
-  // live preview of dim and preset wallpapers; restored on close
   f.dim.addEventListener("input", () =>
     $("bg").style.setProperty("--dim", f.dim.value / 100),
   );
@@ -270,6 +598,8 @@ $("sf").addEventListener("submit", (ev) => {
         "Choose an image first, or set the background to Theme glow.";
       return;
     }
+    const nd = collectDock();
+    if (!nd) return;
     try {
       if (pending) await wpSet(pending);
       localStorage.setItem(
@@ -284,11 +614,12 @@ $("sf").addEventListener("submit", (ev) => {
         }),
       );
     } catch {}
+    await saveDock(nd);
     settings = loadSettings();
     dlg.close();
     tick();
     applyWallpaper();
-    applyUser(true); // live, no reload; forces a fresh fetch
+    applyUser(true);
   });
 
   $("set-reset").addEventListener("click", async () => {
@@ -296,6 +627,13 @@ $("sf").addEventListener("submit", (ev) => {
       localStorage.removeItem(SETTINGS_KEY);
     } catch {}
     await wpDel();
+    for (const x of dock)
+      if (x.icon.startsWith("idb:")) await dockBlobDel(x.icon.slice(4));
+    try {
+      localStorage.removeItem(DOCK_KEY);
+    } catch {}
+    dock = loadDock();
+    renderDock();
     settings = loadSettings();
     dlg.close();
     tick();
@@ -304,8 +642,7 @@ $("sf").addEventListener("submit", (ev) => {
   });
 })();
 
-/* ================= GitHub + nixpkgs stats ================= */
-const TTL = 60 * 60 * 1000; // refetch at most once per hour
+const TTL = 60 * 60 * 1000;
 let USER = "",
   TOKEN = "",
   KEY = "",
@@ -345,7 +682,6 @@ async function prs(state) {
   };
 }
 
-// with a token: GraphQL, same numbers as your profile, including private contributions
 async function viaToken() {
   try {
     const r = await fetch("https://api.github.com/graphql", {
@@ -372,7 +708,6 @@ async function viaToken() {
   }
 }
 
-// without a token: read the public profile fragment (public contributions only, unless cookies are sent)
 async function contributions() {
   let r;
   try {
@@ -511,12 +846,12 @@ async function load(id) {
         const t = TOKEN ? await viaToken() : null;
         if (t && t.n != null) return t;
         const s = await contributions();
-        return t && s.n == null ? t : s; // report the token error if both failed
+        return t && s.n == null ? t : s;
       })(),
       prs("open"),
       prs("merged"),
     ]);
-    if (id !== runId) return; // settings changed while fetching
+    if (id !== runId) return;
     let n = year.n,
       src = "year";
     if (n == null) {
@@ -570,23 +905,15 @@ function applyUser(force) {
 }
 applyUser();
 
-/* ================= icon fallback ================= */
-document.querySelectorAll("#dock img").forEach((img) => {
-  img.addEventListener("error", () => {
-    img.replaceWith(
-      document.createTextNode((img.alt || "?").trim().charAt(0).toUpperCase()),
-    );
-  });
-});
-
-/* ================= dock magnification (macOS style) ================= */
 (() => {
   const dock = $("dock");
-  const items = [...dock.querySelectorAll("a")];
-  const MAX = 1.75; // peak scale under the cursor
-  const RANGE = 140; // px of influence either side of the cursor
+  const getItems = () => [...dock.querySelectorAll("a")];
+  const MAX = 1.75;
+  const RANGE = 140;
 
   dock.addEventListener("mousemove", (e) => {
+    const items = getItems();
+    if (!items.length) return;
     // <a> boxes are never transformed, so they always give the resting layout
     const rects = items.map((a) => a.getBoundingClientRect());
     const base = rects[0].width;
@@ -597,7 +924,6 @@ document.querySelectorAll("#dock img").forEach((img) => {
       );
       return 1 + (MAX - 1) * 0.5 * (1 + Math.cos(Math.PI * d));
     });
-    // spread icons apart so enlarged neighbours don't overlap
     const extra = scales.map((s) => base * (s - 1));
     const total = extra.reduce((a, b) => a + b, 0);
     let run = 0;
@@ -610,7 +936,7 @@ document.querySelectorAll("#dock img").forEach((img) => {
   });
 
   dock.addEventListener("mouseleave", () => {
-    items.forEach((a) => {
+    getItems().forEach((a) => {
       a.style.removeProperty("--s");
       a.style.removeProperty("--tx");
     });

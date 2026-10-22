@@ -142,6 +142,19 @@
           >Dim
           <input id="set-dim" type="range" min="0" max="80" step="5" />
         </label>
+        <div class="dockedit">
+          <div class="dh">
+            <span>Dock</span
+            ><button type="button" id="dock-reset">Reset dock</button>
+          </div>
+          <div id="dock-rows"></div>
+          <button type="button" class="addbtn" id="dock-add">+ Add link</button>
+          <small id="dock-note"
+            >Drag ⠿ or use the arrows to reorder. Click an icon square to upload
+            an image. Up to 12 links.</small
+          >
+          <input type="file" id="dock-file" accept="image/*" hidden />
+        </div>
         <div class="actions">
           <button type="button" class="link" id="set-reset">Reset</button>
           <span class="sp"></span>
@@ -151,32 +164,7 @@
       </form>
     </dialog>
 
-    <nav class="card dock" id="dock">
-      <a href="https://claude.ai" title="Claude"
-        ><b><img src="icons/claude.png" alt="Claude" /></b><em>Claude</em></a
-      >
-      <a href="https://gemini.google.com" title="Gemini"
-        ><b><img src="icons/gemini.png" alt="Gemini" /></b><em>Gemini</em></a
-      >
-      <a href="https://github.com" title="GitHub"
-        ><b><img src="icons/github.png" alt="GitHub" /></b><em>GitHub</em></a
-      >
-      <a href="https://pages.cs.wisc.edu/~remzi/OSTEP/" title="OSTEP"
-        ><b><img src="icons/ostep.png" alt="OSTEP" /></b><em>OSTEP</em></a
-      >
-      <a
-        href="https://nixos-and-flakes.thiscute.world/"
-        title="NixOS &amp; Flakes"
-        ><b><img src="icons/nixos.png" alt="NixOS &amp; Flakes" /></b
-        ><em>NixOS &amp; Flakes</em></a
-      >
-      <a href="https://x.com" title="X"
-        ><b><img src="icons/x.png" alt="X" /></b><em>X</em></a
-      >
-      <a href="https://youtube.com" title="YouTube"
-        ><b><img src="icons/youtube.png" alt="YouTube" /></b><em>YouTube</em></a
-      >
-    </nav>
+    <nav class="card dock" id="dock"></nav>
 
     <script src="script.js"></script>
   </body>
