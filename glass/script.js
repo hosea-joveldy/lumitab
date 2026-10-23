@@ -34,6 +34,7 @@ function loadSettings() {
     token: str(s.token),
     theme: THEMES.includes(s.theme) ? s.theme : "catppuccin",
     bg: s.bg === "custom" || s.wp === "custom" ? "custom" : "glow",
+    player: s.player === true,
     dim: Math.min(80, Math.max(0, Number(s.dim) || 0)),
   };
 }
@@ -237,36 +238,61 @@ function tick() {
 tick();
 setInterval(tick, 10000);
 
-const ENGINES = {
-  google: { url: "https://www.google.com/search?q=", hint: "Search Google…" },
-  ddg: { url: "https://duckduckgo.com/?q=", hint: "Search DuckDuckGo…" },
-  nix: {
-    url: "https://search.nixos.org/packages?channel=unstable&query=",
-    hint: "Search nixpkgs (unstable)…",
+const ENGINE_KEY = "newtab-engines-v1";
+const MAX_ENGINES = 8;
+const DEFAULT_ENGINES = [
+  { id: "google", name: "Google", url: "https://www.google.com/search?q=%s" },
+  { id: "ddg", name: "DuckDuckGo", url: "https://duckduckgo.com/?q=%s" },
+  {
+    id: "nix",
+    name: "NixPkgs",
+    url: "https://search.nixos.org/packages?channel=unstable&query=%s",
   },
-  github: {
-    url: "https://github.com/search?type=repositories&q=",
-    hint: "Search GitHub repositories…",
+  {
+    id: "github",
+    name: "GitHub",
+    url: "https://github.com/search?type=repositories&q=%s",
   },
-  wiki: {
-    url: "https://en.wikipedia.org/w/index.php?search=",
-    hint: "Search Wikipedia…",
+  {
+    id: "wiki",
+    name: "Wikipedia",
+    url: "https://en.wikipedia.org/w/index.php?search=%s",
   },
-};
-let engine = "google";
+];
+
+function loadEngines() {
+  try {
+    const d = JSON.parse(localStorage.getItem(ENGINE_KEY));
+    if (
+      Array.isArray(d) &&
+      d.length &&
+      d.every(
+        (x) =>
+          x &&
+          typeof x.id === "string" &&
+          typeof x.name === "string" &&
+          typeof x.url === "string" &&
+          x.url.includes("%s"),
+      )
+    )
+      return d.slice(0, MAX_ENGINES);
+  } catch {}
+  return DEFAULT_ENGINES.map((x) => ({ ...x }));
+}
+
+let engines = loadEngines();
+let engine = "";
 try {
-  const s = localStorage.getItem("engine");
-  if (ENGINES[s]) engine = s;
+  engine = localStorage.getItem("engine") || "";
 } catch {}
 
-function movePill(animate = true) {
+function movePill() {
   const b = document.querySelector("#engines button.on");
   const pill = $("pill");
   if (!b) return;
   pill.style.width = `${b.offsetWidth}px`;
   pill.style.height = `${b.offsetHeight}px`;
   pill.style.transform = `translate(${b.offsetLeft}px, ${b.offsetTop}px)`;
-  if (!animate) return;
 }
 
 function setEngine(e, animate = true) {
@@ -276,25 +302,49 @@ function setEngine(e, animate = true) {
     .forEach((b) => b.classList.toggle("on", b.dataset.e === e));
   movePill();
   const q = $("q");
+  const hint = `Search ${engines.find((x) => x.id === e)?.name ?? ""}…`;
   if (animate) {
     q.classList.add("swap");
     setTimeout(() => {
-      q.placeholder = ENGINES[e].hint;
+      q.placeholder = hint;
       q.classList.remove("swap");
     }, 120);
   } else {
-    q.placeholder = ENGINES[e].hint;
+    q.placeholder = hint;
   }
   try {
     localStorage.setItem("engine", e);
   } catch {}
 }
-setEngine(engine, false);
+
+function renderEngines() {
+  const box = $("engines");
+  box.querySelectorAll("button").forEach((b) => b.remove());
+  for (const e of engines) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.dataset.e = e.id;
+    b.textContent = e.name;
+    box.appendChild(b);
+  }
+  if (!engines.some((e) => e.id === engine)) engine = engines[0].id;
+  setEngine(engine, false);
+}
+
+function saveEngines(ne) {
+  engines = ne;
+  try {
+    localStorage.setItem(ENGINE_KEY, JSON.stringify(ne));
+  } catch {}
+  renderEngines();
+}
+
+renderEngines();
 requestAnimationFrame(() =>
   requestAnimationFrame(() => $("pill").classList.add("ready")),
 );
-window.addEventListener("load", () => movePill());
-window.addEventListener("resize", () => movePill());
+window.addEventListener("load", movePill);
+window.addEventListener("resize", movePill);
 
 $("engines").addEventListener("click", (ev) => {
   const b = ev.target.closest("button");
@@ -307,7 +357,9 @@ $("engines").addEventListener("click", (ev) => {
 $("sf").addEventListener("submit", (ev) => {
   ev.preventDefault();
   const q = $("q").value.trim();
-  if (q) location.href = ENGINES[engine].url + encodeURIComponent(q);
+  if (!q) return;
+  const cur = engines.find((x) => x.id === engine) ?? engines[0];
+  location.href = cur.url.split("%s").join(encodeURIComponent(q));
 });
 
 (() => {
@@ -320,6 +372,7 @@ $("sf").addEventListener("submit", (ev) => {
     bg: $("set-bg"),
     dim: $("set-dim"),
     file: $("set-file"),
+    player: $("set-player"),
   };
   let pending = null;
 
@@ -520,6 +573,98 @@ $("sf").addEventListener("submit", (ev) => {
     renderDock();
   }
 
+  let edraft = [];
+  const engBox = $("eng-rows");
+
+  function renderEngRows() {
+    engBox.textContent = "";
+    for (const it of edraft) {
+      const row = mk("div", "drow erow");
+      row.dataset.id = it.id;
+      const fields = mk("div", "f");
+      const n = mk("input");
+      n.placeholder = "Name";
+      n.value = it.name;
+      n.addEventListener("input", () => (it.name = n.value));
+      const u = mk("input");
+      u.placeholder = "https://example.com/search?q=%s";
+      u.value = it.url;
+      u.spellcheck = false;
+      u.addEventListener("input", () => {
+        it.url = u.value;
+        u.setCustomValidity("");
+      });
+      fields.append(n, u);
+
+      const acts = mk("div", "a");
+      const move = (d) => {
+        const i = edraft.indexOf(it);
+        const k = i + d;
+        if (k < 0 || k >= edraft.length) return;
+        [edraft[i], edraft[k]] = [edraft[k], edraft[i]];
+        renderEngRows();
+      };
+      const up = mk("button", null, "▲");
+      const dn = mk("button", null, "▼");
+      const rm = mk("button", null, "✕");
+      for (const b of [up, dn, rm]) b.type = "button";
+      up.title = "Move up";
+      dn.title = "Move down";
+      rm.title = "Remove";
+      up.addEventListener("click", () => move(-1));
+      dn.addEventListener("click", () => move(1));
+      rm.addEventListener("click", () => {
+        edraft = edraft.filter((x) => x !== it);
+        renderEngRows();
+      });
+      acts.append(up, dn, rm);
+
+      row.append(fields, acts);
+      engBox.appendChild(row);
+    }
+    $("eng-add").hidden = edraft.length >= MAX_ENGINES;
+  }
+
+  $("eng-add").addEventListener("click", () => {
+    if (edraft.length >= MAX_ENGINES) return;
+    edraft.push({ id: uid(), name: "", url: "" });
+    renderEngRows();
+    engBox.lastElementChild?.querySelector("input")?.focus();
+  });
+
+  $("eng-reset").addEventListener("click", () => {
+    edraft = DEFAULT_ENGINES.map((x) => ({ ...x }));
+    renderEngRows();
+  });
+
+  function collectEngines() {
+    const out = [];
+    for (const it of edraft) {
+      if (!it.url.trim() && !it.name.trim()) continue;
+      let raw = it.url.trim();
+      if (!/^[a-z][a-z0-9+.-]*:/i.test(raw)) raw = `https://${raw}`;
+      const probe = raw.includes("%s")
+        ? normalizeUrl(raw.split("%s").join("x"))
+        : null;
+      if (!probe) {
+        const inp = engBox.querySelector(
+          `.drow[data-id="${it.id}"] .f input:nth-child(2)`,
+        );
+        if (inp) {
+          inp.setCustomValidity("Use an http(s) address that contains %s");
+          inp.reportValidity();
+        }
+        return null;
+      }
+      out.push({
+        id: it.id,
+        name: it.name.trim() || new URL(probe).hostname.replace(/^www\./, ""),
+        url: raw,
+      });
+    }
+    return out.length ? out : DEFAULT_ENGINES.map((x) => ({ ...x }));
+  }
+
   dlg.addEventListener("close", () => {
     pendUrls.forEach((u) => URL.revokeObjectURL(u));
     pendUrls.clear();
@@ -543,12 +688,15 @@ $("sf").addEventListener("submit", (ev) => {
     f.tz.value = settings.tz;
     f.theme.value = settings.theme;
     f.bg.value = settings.bg;
+    f.player.checked = settings.player;
     f.dim.value = settings.dim;
     f.file.value = "";
     pending = null;
     f.tz.setCustomValidity("");
     draft = dock.map((x) => ({ ...x }));
     renderRows();
+    edraft = engines.map((x) => ({ ...x }));
+    renderEngRows();
     dlg.showModal();
     f.gh.focus();
   };
@@ -600,6 +748,8 @@ $("sf").addEventListener("submit", (ev) => {
     }
     const nd = collectDock();
     if (!nd) return;
+    const ne = collectEngines();
+    if (!ne) return;
     try {
       if (pending) await wpSet(pending);
       localStorage.setItem(
@@ -610,12 +760,15 @@ $("sf").addEventListener("submit", (ev) => {
           token: f.token.value.trim(),
           theme: f.theme.value,
           bg: f.bg.value,
+          player: f.player.checked,
           dim: Number(f.dim.value),
         }),
       );
     } catch {}
     await saveDock(nd);
+    saveEngines(ne);
     settings = loadSettings();
+    applyPlayer();
     dlg.close();
     tick();
     applyWallpaper();
@@ -634,7 +787,13 @@ $("sf").addEventListener("submit", (ev) => {
     } catch {}
     dock = loadDock();
     renderDock();
+    try {
+      localStorage.removeItem(ENGINE_KEY);
+    } catch {}
+    engines = loadEngines();
+    renderEngines();
     settings = loadSettings();
+    applyPlayer();
     dlg.close();
     tick();
     applyWallpaper();
@@ -904,6 +1063,71 @@ function applyUser(force) {
   }
 }
 applyUser();
+
+const ext = globalThis.browser ?? globalThis.chrome;
+let port = null;
+let retry = 0;
+let playerGen = 0;
+
+function showPlayer(m, err) {
+  const el = $("player");
+  if (!settings.player || (!err && !m?.active)) {
+    el.hidden = true;
+    return;
+  }
+  el.hidden = false;
+  const playing = !err && m.status === "Playing";
+  el.classList.toggle("paused", !playing);
+  $("disc").classList.toggle("on", playing);
+  $("np-title").textContent = err
+    ? "Now playing unavailable"
+    : m.title || "Unknown track";
+  $("np-artist").textContent = err
+    ? "lumitab helper not found"
+    : m.artist || m.player || "";
+  el.title =
+    err ||
+    [m.title, m.artist, m.player && `(${m.player})`]
+      .filter(Boolean)
+      .join(" · ");
+  const img = $("disc-art");
+  const art = err ? "" : m.art || "";
+  if (img.dataset.src !== art) {
+    img.dataset.src = art;
+    img.hidden = !art;
+    if (art) img.src = art;
+  }
+}
+$("disc-art").addEventListener("error", (e) => (e.target.hidden = true));
+
+function connectPlayer(gen) {
+  if (gen !== playerGen) return;
+  try {
+    const p = ext.runtime.connectNative("lumitab_player");
+    port = p;
+    p.onMessage.addListener((m) => gen === playerGen && showPlayer(m));
+    p.onDisconnect.addListener(() => {
+      if (gen !== playerGen) return;
+      port = null;
+      showPlayer(null, p.error?.message || "helper stopped");
+      retry = setTimeout(() => connectPlayer(gen), 15000);
+    });
+  } catch (e) {
+    showPlayer(null, String(e.message || e));
+  }
+}
+
+function applyPlayer() {
+  playerGen++;
+  clearTimeout(retry);
+  try {
+    port?.disconnect();
+  } catch {}
+  port = null;
+  showPlayer(null);
+  if (settings.player && ext?.runtime?.connectNative) connectPlayer(playerGen);
+}
+applyPlayer();
 
 (() => {
   const dock = $("dock");

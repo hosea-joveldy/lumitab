@@ -21,30 +21,32 @@
     </button>
 
     <main class="wrap">
-      <!-- left: clock + search -->
       <div class="col">
         <section class="card hero">
           <div id="time">--:--</div>
           <div id="date"></div>
+          <div class="player" id="player" hidden>
+            <div class="disc" id="disc">
+              <div class="label"><img id="disc-art" alt="" hidden /></div>
+            </div>
+            <div class="np">
+              <div id="np-title"></div>
+              <div id="np-artist"></div>
+            </div>
+          </div>
         </section>
 
         <form class="card search" id="sf" autocomplete="off">
           <div class="engines" id="engines">
             <span class="pill" id="pill"></span>
-            <button type="button" data-e="google">Google</button>
-            <button type="button" data-e="ddg">DuckDuckGo</button>
-            <button type="button" data-e="nix">NixPkgs</button>
-            <button type="button" data-e="github">GitHub</button>
-            <button type="button" data-e="wiki">Wikipedia</button>
           </div>
           <div class="field">
-            <input id="q" type="text" placeholder="Search the web…" autofocus />
+            <input id="q" type="text" placeholder="Search…" autofocus />
             <button type="submit">Search</button>
           </div>
         </form>
       </div>
 
-      <!-- right: stats -->
       <div class="col">
         <section class="card stat" id="gh">
           <h2 id="gh-title">github</h2>
@@ -72,7 +74,6 @@
       </div>
     </main>
 
-    <!-- settings modal -->
     <dialog class="modal" id="settings" aria-labelledby="settings-title">
       <form id="settings-form">
         <h3 id="settings-title">Settings</h3>
@@ -114,6 +115,13 @@
           <small>Leave empty to use your system timezone.</small>
         </label>
         <datalist id="tzlist"></datalist>
+        <label class="check"
+          ><input id="set-player" type="checkbox" />Show now playing</label
+        >
+        <small class="hint"
+          >Needs the lumitab native helper. Shows what your local media player
+          is playing.</small
+        >
         <label
           >Theme
           <select id="set-theme">
@@ -142,6 +150,20 @@
           >Dim
           <input id="set-dim" type="range" min="0" max="80" step="5" />
         </label>
+        <div class="engedit">
+          <div class="dh">
+            <span>Search engines</span
+            ><button type="button" id="eng-reset">Reset engines</button>
+          </div>
+          <div id="eng-rows"></div>
+          <button type="button" class="addbtn" id="eng-add">
+            + Add engine
+          </button>
+          <small
+            >Put %s where the search words go, for example
+            https://example.com/search?q=%s. Up to 8 engines.</small
+          >
+        </div>
         <div class="dockedit">
           <div class="dh">
             <span>Dock</span
