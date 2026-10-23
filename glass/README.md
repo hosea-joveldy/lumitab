@@ -5,6 +5,16 @@ A lightweight Firefox new-tab extension with a frosted-glass aesthetic. It featu
 ![Lumitab Glass with default glow theme](../assets/lumitab-glass-no-bg.png)
 ![Lumitab Glass with custom background](../assets/lumitab-glass-with-bg.png)
 
+<details>
+<summary><strong>With media player enabled</strong></summary>
+
+<br>
+
+![Glass theme screenshot](./assets/lumitab-glass-with-bg-with-music.png)
+![Glass theme screenshot with default glow](./assets/lumitab-glass-no-bg-with-music.png)
+
+</details>
+
 ## Features
 
 - Time and date with automatic city detection and custom timezone support
