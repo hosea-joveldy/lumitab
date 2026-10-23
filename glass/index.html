@@ -23,15 +23,23 @@
     <main class="wrap">
       <div class="col">
         <section class="card hero">
-          <div id="time">--:--</div>
-          <div id="date"></div>
-          <div class="player" id="player" hidden>
-            <div class="disc" id="disc">
-              <div class="label"><img id="disc-art" alt="" hidden /></div>
+          <div class="clockrow">
+            <div>
+              <div id="time">--:--</div>
+              <div id="date"></div>
             </div>
-            <div class="np">
-              <div id="np-title"></div>
-              <div id="np-artist"></div>
+            <div class="disc" id="disc" hidden>
+              <img id="disc-art" alt="" hidden />
+            </div>
+          </div>
+          <div class="np" id="np" hidden>
+            <div id="np-title"></div>
+            <div id="np-artist"></div>
+            <div id="np-progress" hidden>
+              <div class="bar"><i id="np-bar"></i></div>
+              <div class="times">
+                <span id="np-pos"></span><span id="np-len"></span>
+              </div>
             </div>
           </div>
         </section>

@@ -1069,27 +1069,43 @@ let port = null;
 let retry = 0;
 let playerGen = 0;
 
+const fmtTime = (us) => {
+  const s = Math.max(0, Math.floor(us / 1e6));
+  return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+};
+
 function showPlayer(m, err) {
-  const el = $("player");
+  const np = $("np");
+  const disc = $("disc");
   if (!settings.player || (!err && !m?.active)) {
-    el.hidden = true;
+    np.hidden = true;
+    disc.hidden = true;
     return;
   }
-  el.hidden = false;
+  np.hidden = false;
+  disc.hidden = false;
   const playing = !err && m.status === "Playing";
-  el.classList.toggle("paused", !playing);
-  $("disc").classList.toggle("on", playing);
+  for (const el of [np, disc]) el.classList.toggle("paused", !playing);
+  disc.classList.toggle("on", playing);
   $("np-title").textContent = err
     ? "Now playing unavailable"
     : m.title || "Unknown track";
-  $("np-artist").textContent = err
-    ? "lumitab helper not found"
-    : m.artist || m.player || "";
-  el.title =
+  $("np-artist").textContent = err || m.artist || m.player || "";
+  np.title =
     err ||
     [m.title, m.artist, m.player && `(${m.player})`]
       .filter(Boolean)
       .join(" · ");
+
+  const len = !err && m.length > 0 ? m.length : 0;
+  $("np-progress").hidden = !len;
+  if (len) {
+    const pos = Math.min(m.position || 0, len);
+    $("np-bar").style.width = `${(pos / len) * 100}%`;
+    $("np-pos").textContent = fmtTime(pos);
+    $("np-len").textContent = fmtTime(len);
+  }
+
   const img = $("disc-art");
   const art = err ? "" : m.art || "";
   if (img.dataset.src !== art) {
@@ -1125,7 +1141,10 @@ function applyPlayer() {
   } catch {}
   port = null;
   showPlayer(null);
-  if (settings.player && ext?.runtime?.connectNative) connectPlayer(playerGen);
+  if (!settings.player) return;
+  if (!ext?.runtime?.connectNative)
+    return showPlayer(null, "nativeMessaging permission is missing");
+  connectPlayer(playerGen);
 }
 applyPlayer();
 
