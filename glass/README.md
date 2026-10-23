@@ -10,8 +10,8 @@ A lightweight Firefox new-tab extension with a frosted-glass aesthetic. It featu
 
 <br>
 
-![Glass theme screenshot](./assets/lumitab-glass-with-bg-with-music.png)
-![Glass theme screenshot with default glow](./assets/lumitab-glass-no-bg-with-music.png)
+![Glass theme screenshot](../assets/lumitab-glass-with-bg-with-music.png)
+![Glass theme screenshot with default glow](../assets/lumitab-glass-no-bg-with-music.png)
 
 </details>
 
