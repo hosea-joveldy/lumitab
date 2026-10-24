@@ -101,7 +101,7 @@ body {
   margin: 0 auto;
   padding: clamp(70px, 9vh, 110px) 24px 160px;
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
   gap: 18px;
   align-items: stretch;
 }
@@ -109,6 +109,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  min-width: 0;
 }
 
 .hero {
@@ -257,7 +258,7 @@ body {
 }
 .pair {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 16px;
 }
 .latest {
@@ -447,7 +448,7 @@ body {
 
 @media (max-width: 820px) {
   .wrap {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     padding-top: 90px;
   }
   .hero {
