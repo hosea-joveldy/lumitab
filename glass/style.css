@@ -220,10 +220,23 @@ body {
 .stat {
   --r: 32px;
   padding: 26px 30px;
+  display: flex;
+  flex-direction: column;
+}
+#gh {
+  flex: 1;
+}
+#gh-nix {
+  flex: none;
+  min-height: 180px;
+}
+#gh-body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+}
+#gh-body .cap {
+  margin-bottom: 18px;
 }
 .stat h2 {
   margin: 0 0 12px;
@@ -507,7 +520,7 @@ body[data-wp="custom"] .bg {
   grid-auto-flow: column;
   grid-template-rows: repeat(7, auto);
   gap: 2px;
-  margin-top: 18px;
+  margin-top: auto;
 }
 .heat i {
   aspect-ratio: 1;
