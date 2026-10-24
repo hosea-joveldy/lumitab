@@ -896,3 +896,6 @@ body[data-wp="custom"] .bg {
   font-size: 0.72rem;
   color: var(--muted);
 }
+.modal .hint a {
+  color: var(--accent);
+}
