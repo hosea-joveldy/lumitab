@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Lumitab Glass",
-  "version": "1.3",
+  "version": "1.4",
   "description": "A glass themed startpage extension, targetted for nix/nixos user especially those who contribute to nixpkgs.",
   "browser_specific_settings": {
     "gecko": {
