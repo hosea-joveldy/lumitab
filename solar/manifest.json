@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Lumitab Solar",
-  "version": "1.11",
+  "version": "1.12",
   "description": "A solar system themed startpage extension, targetted for nix/nixos user especially those who contribute to nixpkgs.",
   "browser_specific_settings": {
     "gecko": {
